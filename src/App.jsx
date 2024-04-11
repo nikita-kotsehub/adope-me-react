@@ -1,27 +1,39 @@
-import React from 'react';
-import { createRoot } from 'react-dom';
+import { useState } from "react";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AdoptedPetContext from "./AdoptedPetContext";
+import SearchParams from "./SearchParams";
+import Details from "./Details";
 
-const Pet = (props) => {
-    return React.createElement("div", {}, [
-        React.createElement("h1", {}, props.name),
-        React.createElement("h2", {}, props.animal),
-        React.createElement("h2", {}, props.breed),
-    ])
-}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+      cacheTime: Infinity,
+    },
+  },
+});
 
 const App = () => {
-    return React.createElement(
-        "div",
-        {},
-        [
-            React.createElement("h1", {}, "Adopt Me!"),
-            React.createElement(Pet, { name: "Zara", animal: "dog", breed: "best dog" }),
-            React.createElement(Pet, { name: "Milka", animal: "cat", breed: "kittie" }),
-            React.createElement(Pet, { name: "Marsik", animal: "cat", breed: "cute cat!" }),
-        ]
-    )
-}
+  const adoptedPet = useState(null)
+  return (
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AdoptedPetContext.Provider value={adoptedPet}>
+          <header>
+            <Link to="/">Adopt Me!</Link>
+          </header>
+          <Routes>
+            <Route path="/details/:id" element={<Details />} />
+            <Route path="/" element={<SearchParams />} />
+          </Routes>
+        </AdoptedPetContext.Provider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  );
+};
 
-const container = document.getElementById('root');
+const container = document.getElementById("root");
 const root = createRoot(container);
-root.render(React.createElement(App));
+root.render(<App />);
